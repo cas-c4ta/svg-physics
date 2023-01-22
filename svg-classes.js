@@ -1,8 +1,7 @@
 class Path {
-  constructor(points, speed, direction, grav) {
+  constructor(points, angle, speed, direction, grav) {
     this.d = ''
     for (const [index, point] of points.entries()) {
-      console.log(points)
       if ( index == 0) {
         this.d += `M ${point.getX()} ${point.getY()} `
       } else {
@@ -14,8 +13,8 @@ class Path {
     }
     const newPath = document.createElementNS(svgNS, 'path')
     newPath.setAttribute("d", this.d)
-    newPath.setAttribute('stroke-width', '2')
-    newPath.style.stroke = 'black'
+    newPath.setAttribute('fill', 'red')
+    // newPath.style.stroke = 'black'
     // SVG-Node
     this.html = newPath
 
@@ -23,6 +22,8 @@ class Path {
     // Velocity = Speed & Direction
     this.velocity = new Vector(0, 0)
     // Speed = this.velocity.getLength()
+    // angle the «ship» is pointing
+    this.angle = angle
     // Direction = this.velocity.getAngle()
     this.direction = direction || 0
     this.speed = speed || 0
@@ -44,6 +45,12 @@ class Path {
   getY() {
     return this.position.getY()
   }
+  getAngle() {
+    return this.angle
+  }
+  setAngle(a) {
+    this.angle = a
+  }
   setFill(c) {
     this.html.setAttribute('fill', c)
   }
@@ -55,7 +62,9 @@ class Path {
     this.position.addTo(this.velocity)
     // moving all points in a path is awful
     // transform seems good enough for the time being
-    this.html.setAttribute('transform', `translate(${this.position.getX()} ${this.position.getY()})`)
+    this.html.setAttribute('transform', `rotate(${this.angle}, ${this.position.getX() + 10}, ${this.position.getY() + 10}) translate(${this.position.getX()} ${this.position.getY()})`)
+    // beware:
+    // turning point for angle hard coded garbage!
   }
   accelerate(accel) {
     this.velocity.addTo(accel)
