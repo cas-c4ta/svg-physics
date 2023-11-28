@@ -21,6 +21,7 @@ class Vector {
     this.setY(Math.sin(angle) * length) 
   }
   getAngle() {
+    // note to myself: atan2 returns RADIANS, of course
     return Math.atan2(this._y, this._x)
   }
   setLength(length) {

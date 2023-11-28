@@ -13,8 +13,8 @@ const c = new Vector(20, 0)
 let points = [a, b, c]
 const angle = 0
 const ship = new Path(points, angle, 0, 0)
-
 const thrust = new Vector(0, 0)
+ship.html.classList.add('ship')
 
 let turningLeft = false
 let turningRight = false
@@ -42,14 +42,15 @@ function loop() {
   frameCount += 1
 
   if (turningLeft) {
-    ship.setAngle(ship.getAngle() - 1)
+    ship.setAngle(ship.getAngle() - 0.05)
   }
 
   if (turningRight) {
-    ship.setAngle(ship.getAngle() + 1)
+    ship.setAngle(ship.getAngle() + 0.05)
   }
 
   thrust.setAngle(ship.getAngle())
+
   if (thrusting) {
     thrust.setLength(0.1)
   } else {
@@ -59,6 +60,7 @@ function loop() {
   ship.accelerate(thrust)
   ship.move()
 
+  // handle  leaving of viewport
   if (ship.position.getX() > width) {
     ship.position.setX(0)
   }
@@ -71,6 +73,7 @@ function loop() {
   if (ship.position.getY() < 0) {
     ship.position.setY(height)
   }
+
   window.requestAnimationFrame(loop)
 }
 

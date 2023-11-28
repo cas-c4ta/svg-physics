@@ -1,8 +1,9 @@
 class Path {
+  // ‘ship’ in coding math
   constructor(points, angle, speed, direction, grav) {
     this.d = ''
     for (const [index, point] of points.entries()) {
-      if ( index == 0) {
+      if (index == 0) {
         this.d += `M ${point.getX()} ${point.getY()} `
       } else {
         this.d += `L  ${point.getX()} ${point.getY()} `
@@ -12,7 +13,7 @@ class Path {
       }
     }
     const newPath = document.createElementNS(svgNS, 'path')
-    newPath.setAttribute("d", this.d)
+    newPath.setAttribute('d', this.d)
     newPath.setAttribute('fill', 'red')
     // newPath.style.stroke = 'black'
     // SVG-Node
@@ -49,7 +50,8 @@ class Path {
     return this.angle
   }
   setAngle(a) {
-    this.angle = a
+    this.angle = a % (Math.PI * 2)
+    console.log('set angle')
   }
   setFill(c) {
     this.html.setAttribute('fill', c)
@@ -62,9 +64,16 @@ class Path {
     this.position.addTo(this.velocity)
     // moving all points in a path is awful
     // transform seems good enough for the time being
-    this.html.setAttribute('transform', `rotate(${this.angle}, ${this.position.getX() + 10}, ${this.position.getY() + 10}) translate(${this.position.getX()} ${this.position.getY()})`)
+    const x = this.position.getX()
+    const y = this.position.getY()
+    const translateString = `translate(${Math.trunc(x)} ${Math.trunc(y)})`
     // beware:
-    // turning point for angle hard coded garbage!
+    // turning point for angle is hard coded garbage!
+    const rotateString = `rotate(${
+      ((this.angle - Math.PI / 2) * 180) / Math.PI
+    }, 10, 10)` /* 🤡🐒 */
+    // also: stupid discrepancy between vector-angle and transform-angle
+    this.html.setAttribute('transform', `${translateString} ${rotateString}`)
   }
   accelerate(accel) {
     this.velocity.addTo(accel)
@@ -72,17 +81,19 @@ class Path {
 }
 
 class Rect {
+  // ‘particle’ in coding math
   constructor(x, y, speed, direction, grav) {
     const newRect = document.createElementNS(svgNS, 'rect')
-    newRect.setAttribute("x", x)
-    newRect.setAttribute("y", y)
-    newRect.setAttribute("width", 10) // hard coded for now
-    newRect.setAttribute("height", 10)
+    newRect.setAttribute('x', x)
+    newRect.setAttribute('y', y)
+    newRect.setAttribute('width', 10) // hard coded for now
+    newRect.setAttribute('height', 10)
 
     this.html = newRect
     this.position = new Vector(x, y)
     // Velocity = Speed & Direction
     this.velocity = new Vector(0, 0)
+    this.mass = 1
     // Speed = this.velocity.getLength()
     // Direction = this.velocity.getAngle()
     this.direction = direction || 0
@@ -123,6 +134,27 @@ class Rect {
   }
   accelerate(accel) {
     this.velocity.addTo(accel)
+  }
+  angleTo(p2) {
+    // angle to body pulling on particle
+    return Math.atan2(
+      p2.position.getY() - this.position.getY(),
+      p2.position.getX() - this.position.getX()
+    )
+  }
+  distanceTo(p2) {
+    // returns distance to other particle
+    const dx = p2.position.getX() - this.position.getX()
+    const dy = p2.position.gety() - this.position.gety()
+    return Math.sqrt(dx * dx + dy * dy) // Pythagoras
+  }
+  gravitateTo(p2) {
+    // returns gravity of p2 on this object
+    const grav = new Vector(0, 0)
+    const dist = this.distanceTo(p2)
+    grav.setLength((p2.mass / dist) * dist)
+    grav.setAngle(this.angleTo(p2))
+    this.velocity.addTo(grav)
   }
   /*
   checkPosition() {
