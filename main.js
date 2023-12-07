@@ -1,5 +1,7 @@
 const height = window.innerHeight
 const width = window.innerWidth
+const PI = Math.PI
+const TAU = Math.PI * 2
 
 const svgNS = 'http://www.w3.org/2000/svg'
 const svg = document.createElementNS(svgNS, 'svg')
@@ -7,8 +9,34 @@ svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 document.body.appendChild(svg)
 
 
-// const ship = new Circle(x, y, rad, speed, dir, grav)
-// ship.html.style.fill = 'yellow'
+
+/*
+// Episode 13, Friction
+// https://www.youtube.com/watch?v=ueqi8boYS5k
+
+// F R I C T I O N
+const friction = 0.97 // trial & error
+
+// circle vars
+const x = width/2
+const y = height/2
+const rad = 10
+const speed = 10
+const dir = Math.random() * TAU
+const grav = null
+const circle = new Circle(x, y, rad, speed, dir, grav, friction)
+const hue = Math.random()*50 + 100
+circle.html.style.fill = `hsl(${hue} 80% 60%)`
+
+// Animation
+let frameCount = 0
+loop()
+function loop() {
+  frameCount += 1
+  circle.move()
+  window.requestAnimationFrame(loop)
+}
+*/
 
 const circles = []
 for (let i = 0; i < 50; i += 1) {
@@ -16,22 +44,27 @@ for (let i = 0; i < 50; i += 1) {
   const y = 20 + Math.trunc(height - Math.random() * 50)
   const rad = 5 + Math.random() * 10
   const speed = Math.random() * 8 + 5
-  const dir = -Math.PI / 2 + (Math.random() * .2 - .1)
+  const dir = -Math.PI / 2 + (Math.random() * .4 - .2)
   const grav = .15
-  const circle = new Circle(x, y, rad, speed, dir, grav)
+  const friction = 0.992
+  const circle = new Circle(x, y, rad, speed, dir, grav, friction)
   circle.html.style.fill = `hsl(${Math.random()*50} 80% 60%)`
-  circle.bounce = -0.6 // -40% velocity on each collision
+  circle.bounce = -0.7 // -40% velocity on each collision
   circles.push(circle)
 }
-
+// Episode 12, Edge Handling
 // Animation
 let frameCount = 0
 function loop() {
   frameCount += 1
 
   for (const circle of circles) {
+  /* debug
+    if (frameCount % 10 == 0) {
+      console.log(circles[0].velocity.getLength())
+    }
+    */
     circle.move()
-    circle.accelerate(circle.gravity)
 
     const posX = circle.position.getX()
     const posY = circle.position.getY()
@@ -39,6 +72,7 @@ function loop() {
     const hitRight = posX >= width - circle.radius
     const hitTop = posY <= circle.radius
     const hitBottom = posY >= height - circle.radius
+
     if (hitLeft) {
       circle.position.setX(circle.radius)
       circle.velocity.setX(circle.velocity.getX() * circle.bounce)

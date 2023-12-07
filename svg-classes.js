@@ -83,7 +83,7 @@ class Path {
 class Rect {
   // ‘particle’ in coding math
   // constructor(x, y, speed, direction, grav) {
-  constructor(x, y, speed, direction, gravity) {
+  constructor(x, y, speed, direction, gravity, friction) {
     const newRect = document.createElementNS(svgNS, 'rect')
     newRect.setAttribute('x', x)
     newRect.setAttribute('y', y)
@@ -100,6 +100,7 @@ class Rect {
     this.direction = direction || 0
     this.gravity = new Vector(0, gravity || 0)
     this.speed = speed || 0
+    this.friction = friction || 1
     // Acceleration = change of velocity over time (also a vector)
     this.velocity.setLength(this.speed)
     this.velocity.setAngle(this.direction)
@@ -130,6 +131,8 @@ class Rect {
   }
   move() {
     this.position.addTo(this.velocity)
+    this.velocity.addTo(this.gravity)
+    this.velocity.multiplyBy(this.friction)
     this.html.setAttribute('x', this.position.getX())
     this.html.setAttribute('y', this.position.getY())
   }
@@ -171,7 +174,7 @@ class Rect {
 class Circle {
   // ‘particle’ in coding math
   // constructor(x, y, speed, direction, grav) {
-  constructor(x, y, rad, speed, direction, gravity) {
+  constructor(x, y, rad, speed, direction, gravity, friction) {
     const newCircle = document.createElementNS(svgNS, 'circle')
     newCircle.setAttribute('cx', x)
     newCircle.setAttribute('cy', y)
@@ -189,6 +192,7 @@ class Circle {
     this.direction = direction || 0
     this.gravity = new Vector(0, gravity || 0)
     this.speed = speed || 0
+    this.friction = friction || 1
     // Acceleration = change of velocity over time (also a vector)
     this.velocity.setLength(this.speed)
     this.velocity.setAngle(this.direction)
@@ -214,6 +218,27 @@ class Circle {
   }
   move() {
     this.position.addTo(this.velocity)
+
+    // apply gravity if "in the air"
+    // unbefriedigend, to say the least
+    if (this.position.getY() + this.radius - height <= 0.1) {
+      // should be set to floor eventually
+      this.velocity.addTo(this.gravity) // test this!
+    } else {
+      this.position.setY(height - this.radius)
+    }
+
+    // apply friction only "on the floor"
+    // unbefriedigend, to say the least
+    if (Math.trunc(this.position.getY()+this.radius - height) <= 1) {
+      // this.velocity.multiplyBy(this.friction)
+      const xVel = this.velocity.getX()
+      this.velocity.setX(xVel * this.friction)
+      // stop eventually
+      if (this.velocity.getLength() < 0.1) {
+        this.velocity.setLength(0)
+      }
+    }
     this.html.setAttribute('cx', this.position.getX())
     this.html.setAttribute('cy', this.position.getY())
   }
