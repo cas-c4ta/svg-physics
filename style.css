@@ -9,8 +9,3 @@ body {
 svg {
   overflow: visible;
 }
-
-rect {
-  fill: none;
-  stroke: black;
-}

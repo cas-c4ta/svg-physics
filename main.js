@@ -9,7 +9,34 @@ svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 document.body.appendChild(svg)
 
 
+const rect1 = new Rect(20, 30, 40, 20, null, null, null, null)
+rect1.setFill("hotpink")
 
+const rect2 = new Rect(300, 120, 180, 200, null, null, null, null)
+rect2.setFill("lightgreen")
+
+let frameCount = 0
+loop()
+function loop() {
+  frameCount += 1
+  
+  requestAnimationFrame(loop)
+}
+
+document.addEventListener('mousemove', (e) => {
+  const mouseX = e.clientX
+  const mouseY = e.clientY
+  rect1.setX(mouseX)
+  rect1.setY(mouseY)
+
+  if (utils.rectIntersect(rect1, rect2)) {
+    rect1.setFill("red")
+    rect2.setFill("blue")
+  } else {
+    rect1.setFill("hotpink")
+    rect2.setFill("lightgreen")
+  }
+})
 /*
 // Episode 13, Friction
 // https://www.youtube.com/watch?v=ueqi8boYS5k
@@ -37,64 +64,6 @@ function loop() {
   window.requestAnimationFrame(loop)
 }
 */
-
-const circles = []
-for (let i = 0; i < 50; i += 1) {
-  const x = Math.trunc(width / 2 + Math.random()*100 - 50)
-  const y = 20 + Math.trunc(height - Math.random() * 50)
-  const rad = 5 + Math.random() * 10
-  const speed = Math.random() * 8 + 5
-  const dir = -Math.PI / 2 + (Math.random() * .4 - .2)
-  const grav = .15
-  const friction = 0.992
-  const circle = new Circle(x, y, rad, speed, dir, grav, friction)
-  circle.html.style.fill = `hsl(${Math.random()*50} 80% 60%)`
-  circle.bounce = -0.7 // -40% velocity on each collision
-  circles.push(circle)
-}
-// Episode 12, Edge Handling
-// Animation
-let frameCount = 0
-function loop() {
-  frameCount += 1
-
-  for (const circle of circles) {
-  /* debug
-    if (frameCount % 10 == 0) {
-      console.log(circles[0].velocity.getLength())
-    }
-    */
-    circle.move()
-
-    const posX = circle.position.getX()
-    const posY = circle.position.getY()
-    const hitLeft = posX <= circle.radius
-    const hitRight = posX >= width - circle.radius
-    const hitTop = posY <= circle.radius
-    const hitBottom = posY >= height - circle.radius
-
-    if (hitLeft) {
-      circle.position.setX(circle.radius)
-      circle.velocity.setX(circle.velocity.getX() * circle.bounce)
-    }
-    if (hitRight) {
-      circle.position.setX(width - circle.radius)
-      circle.velocity.setX(circle.velocity.getX() * circle.bounce)
-    }
-    if (hitTop) {
-      circle.position.setY(circle.radius)
-      circle.velocity.setY(circle.velocity.getY() * circle.bounce)
-    }
-    if (hitBottom) {
-      circle.position.setY(height - circle.radius)
-      circle.velocity.setY(circle.velocity.getY() * circle.bounce)
-    }
-  }
-
-  window.requestAnimationFrame(loop)
-}
-
-loop()
 
 // Entfernen aller Elemente ausserhalb des
 // sichtbaren Bereichs

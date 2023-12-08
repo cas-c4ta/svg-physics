@@ -32,22 +32,14 @@ class Path {
     this.gravity = new Vector(0, grav || 0)
     svg.appendChild(newPath)
   }
-  /*
-  getW() {
-    return this.html.getAttribute('width')
-  }
-  getH() {
-    return this.html.getAttribute('height')
-  }
-  */
   getX() {
-    return this.position.getX()
+    return parseInt(this.position.getX())
   }
   getY() {
-    return this.position.getY()
+    return parseInt(this.position.getY())
   }
   getAngle() {
-    return this.angle
+    return parseFloat(this.angle)
   }
   setAngle(a) {
     this.angle = a % (Math.PI * 2)
@@ -83,16 +75,18 @@ class Path {
 class Rect {
   // ‘particle’ in coding math
   // constructor(x, y, speed, direction, grav) {
-  constructor(x, y, speed, direction, gravity, friction) {
+  constructor(x, y, w, h, speed, direction, gravity, friction) {
     const newRect = document.createElementNS(svgNS, 'rect')
     newRect.setAttribute('x', x)
     newRect.setAttribute('y', y)
-    newRect.setAttribute('width', 10) // hard coded for now
-    newRect.setAttribute('height', 10)
+    newRect.setAttribute('width', w) // hard coded for now
+    newRect.setAttribute('height', h)
 
     this.html = newRect
     this.position = new Vector(x, y)
     // Velocity = Speed & Direction
+    this._width = w
+    this._height = h
     this.velocity = new Vector(0, 0)
     this.mass = 10
     // Speed = this.velocity.getLength()
@@ -111,17 +105,34 @@ class Rect {
     */
     svg.appendChild(newRect)
   }
-  getW() {
-    return this.html.getAttribute('width')
+  getWidth() {
+    return parseInt(this.html.getAttribute('width'))
   }
-  getH() {
-    return this.html.getAttribute('height')
+  getHeight() {
+    return parseInt(this.html.getAttribute('height'))
   }
   getX() {
     return parseInt(this.html.getAttribute('x'))
   }
   getY() {
     return parseInt(this.html.getAttribute('y'))
+  }
+  setX(x) {
+    this.position.setX(x)
+    this.html.setAttribute('x', x)
+  }
+  setY(y) {
+    this.position.setY(y)
+    this.html.setAttribute('y', y)
+  }
+  setWidth(w) {
+    this._width = w
+    this.html.setAttribute('width', w)
+    
+  }
+  setHeight(h) {
+    this._height = h
+    this.html.setAttribute('height', h)
   }
   setFill(c) {
     this.html.setAttribute('fill', c)
@@ -201,14 +212,22 @@ class Circle {
 
     svg.appendChild(newCircle)
   }
-  getR() {
-    return this.html.getAttribute('r')
+  getRadius() {
+    return this.radius
   }
   getX() {
-    return parseInt(this.html.getAttribute('cx'))
+    return this.position.getX()
   }
   getY() {
-    return parseInt(this.html.getAttribute('cy'))
+    return this.position.getY()
+  }
+  setX(newX) {
+    this.position.setX(newX)
+    this.html.setAttribute('cx', newX)
+  }
+  setY(newY) {
+    this.position.setY(newY)
+    this.html.setAttribute('cy', newY)
   }
   setFill(c) {
     this.html.setAttribute('fill', c)
@@ -221,24 +240,24 @@ class Circle {
 
     // apply gravity if "in the air"
     // unbefriedigend, to say the least
-    if (this.position.getY() + this.radius - height <= 0.1) {
+    // if (this.position.getY() + this.radius - height <= 0.1) {
       // should be set to floor eventually
       this.velocity.addTo(this.gravity) // test this!
-    } else {
-      this.position.setY(height - this.radius)
-    }
+    // } else {
+    //   this.position.setY(height - this.radius)
+    // }
 
     // apply friction only "on the floor"
     // unbefriedigend, to say the least
-    if (Math.trunc(this.position.getY()+this.radius - height) <= 1) {
+    // if (Math.trunc(this.position.getY()+this.radius - height) <= 1) {
       // this.velocity.multiplyBy(this.friction)
       const xVel = this.velocity.getX()
       this.velocity.setX(xVel * this.friction)
       // stop eventually
-      if (this.velocity.getLength() < 0.1) {
-        this.velocity.setLength(0)
-      }
-    }
+      // if (this.velocity.getLength() < 0.1) {
+      //   this.velocity.setLength(0)
+      // }
+    // }
     this.html.setAttribute('cx', this.position.getX())
     this.html.setAttribute('cy', this.position.getY())
   }
