@@ -1,9 +1,33 @@
+@font-face {
+  font-family: 'jgs7';
+  src: url('/fonts/jgs7.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  font-family: 'jgs7';
+  font-size: 28px;
+  line-height: 1;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  height: 100vh;
+  min-height: 100vh;
   background: #222;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+h1, h2, h3, p, li { color: white; }
+
+a {
+  color: unset;
+  text-decoration: none;
 }
 
 svg {

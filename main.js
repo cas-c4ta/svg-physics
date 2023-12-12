@@ -9,61 +9,6 @@ svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
 document.body.appendChild(svg)
 
 
-const rect1 = new Rect(20, 30, 40, 20, null, null, null, null)
-rect1.setFill("hotpink")
-
-const rect2 = new Rect(300, 120, 180, 200, null, null, null, null)
-rect2.setFill("lightgreen")
-
-let frameCount = 0
-loop()
-function loop() {
-  frameCount += 1
-  
-  requestAnimationFrame(loop)
-}
-
-document.addEventListener('mousemove', (e) => {
-  const mouseX = e.clientX
-  const mouseY = e.clientY
-  rect1.setX(mouseX)
-  rect1.setY(mouseY)
-
-  if (utils.rectIntersect(rect1, rect2)) {
-    rect1.setFill("red")
-    rect2.setFill("blue")
-  } else {
-    rect1.setFill("hotpink")
-    rect2.setFill("lightgreen")
-  }
-})
-/*
-// Episode 13, Friction
-// https://www.youtube.com/watch?v=ueqi8boYS5k
-
-// F R I C T I O N
-const friction = 0.97 // trial & error
-
-// circle vars
-const x = width/2
-const y = height/2
-const rad = 10
-const speed = 10
-const dir = Math.random() * TAU
-const grav = null
-const circle = new Circle(x, y, rad, speed, dir, grav, friction)
-const hue = Math.random()*50 + 100
-circle.html.style.fill = `hsl(${hue} 80% 60%)`
-
-// Animation
-let frameCount = 0
-loop()
-function loop() {
-  frameCount += 1
-  circle.move()
-  window.requestAnimationFrame(loop)
-}
-*/
 
 // Entfernen aller Elemente ausserhalb des
 // sichtbaren Bereichs
@@ -157,26 +102,6 @@ if (thrusting) {
 }
 
 ship.accelerate(thrust)
-*/
-
-/*
-// Episode 11 «Gravity»
-const cx = Math.trunc(width/2), cy = Math.trunc(height/2)
-
-const sun = new Circle(cx, cy, 20, 0, 0)
-const planet = new Circle(cx + 200, cy, 10, 10, -Math.PI / 2)
-
-sun.mass = 20000
-sun.setFill("gold")
-planet.setFill("violet")
-
-function loop() {
-
-  planet.gravitateTo(sun)
-  planet.move()
-  requestAnimationFrame(loop)
-}
-loop()
 */
 
 /*

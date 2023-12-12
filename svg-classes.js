@@ -4,9 +4,9 @@ class Path {
     this.d = ''
     for (const [index, point] of points.entries()) {
       if (index == 0) {
-        this.d += `M ${point.getX()} ${point.getY()} `
+        this.d += `M ${point.x} ${point.y} `
       } else {
-        this.d += `L  ${point.getX()} ${point.getY()} `
+        this.d += `L  ${point.x} ${point.y} `
       }
       if (index == points.length - 1) {
         this.d += 'Z' // close path
@@ -15,22 +15,29 @@ class Path {
     const newPath = document.createElementNS(svgNS, 'path')
     newPath.setAttribute('d', this.d)
     newPath.setAttribute('fill', 'red')
-    // newPath.style.stroke = 'black'
+
     // SVG-Node
     this.html = newPath
 
-    this.position = new Vector(points[0].getX(), points[0].getY()) // kein Sinn für Pfad
-    // Velocity = Speed & Direction
-    this.velocity = new Vector(0, 0)
-    // Speed = this.velocity.getLength()
-    // angle the «ship» is pointing
     this.angle = angle
-    // Direction = this.velocity.getAngle()
     this.direction = direction || 0
     this.speed = speed || 0
     // Acceleration = change of velocity over time (also a vector)
-    this.gravity = new Vector(0, grav || 0)
     svg.appendChild(newPath)
+  }
+  updatePoints(points) {
+    this.d = ''
+    for (const [index, point] of points.entries()) {
+      if (index == 0) {
+        this.d += `M ${point.x} ${point.y} `
+      } else {
+        this.d += `L  ${point.x} ${point.y} `
+      }
+      if (index == points.length - 1) {
+        this.d += 'Z' // close path
+      }
+    }
+    this.html.setAttribute('d', this.d)
   }
   getX() {
     return parseInt(this.position.getX())
@@ -74,7 +81,6 @@ class Path {
 
 class Rect {
   // ‘particle’ in coding math
-  // constructor(x, y, speed, direction, grav) {
   constructor(x, y, w, h, speed, direction, gravity, friction) {
     const newRect = document.createElementNS(svgNS, 'rect')
     newRect.setAttribute('x', x)
@@ -83,215 +89,197 @@ class Rect {
     newRect.setAttribute('height', h)
 
     this.html = newRect
-    this.position = new Vector(x, y)
-    // Velocity = Speed & Direction
+
+    this.x = x
+    this.y = y
     this._width = w
     this._height = h
-    this.velocity = new Vector(0, 0)
-    this.mass = 10
-    // Speed = this.velocity.getLength()
-    // Direction = this.velocity.getAngle()
+
+    this.vx = Math.cos(direction) * speed
+    this.vy = Math.sin(direction) * speed
+    this.gravity = gravity || 0
+
+    this.bounce = -1
+    this.mass = 1
     this.direction = direction || 0
-    this.gravity = new Vector(0, gravity || 0)
     this.speed = speed || 0
     this.friction = friction || 1
-    // Acceleration = change of velocity over time (also a vector)
-    this.velocity.setLength(this.speed)
-    this.velocity.setAngle(this.direction)
-    /*
-    const cx = x + w/2
-    const cy = y + h/2
-    newRect.setAttribute('transform-origin', `${cx} ${cy}`)
-    */
     svg.appendChild(newRect)
   }
+
   getWidth() {
     return parseInt(this.html.getAttribute('width'))
   }
+
   getHeight() {
     return parseInt(this.html.getAttribute('height'))
   }
+
   getX() {
     return parseInt(this.html.getAttribute('x'))
   }
+
   getY() {
     return parseInt(this.html.getAttribute('y'))
   }
+
   setX(x) {
-    this.position.setX(x)
+    this.x = x
     this.html.setAttribute('x', x)
   }
+
   setY(y) {
-    this.position.setY(y)
+    this.y = y
     this.html.setAttribute('y', y)
   }
+
   setWidth(w) {
     this._width = w
     this.html.setAttribute('width', w)
-    
   }
+
   setHeight(h) {
     this._height = h
     this.html.setAttribute('height', h)
   }
+
   setFill(c) {
     this.html.setAttribute('fill', c)
   }
+
   setStroke(s) {
     this.html.setAttribute('stroke', s)
   }
+
   move() {
-    this.position.addTo(this.velocity)
-    this.velocity.addTo(this.gravity)
-    this.velocity.multiplyBy(this.friction)
-    this.html.setAttribute('x', this.position.getX())
-    this.html.setAttribute('y', this.position.getY())
+    this.vx *= this.friction
+    this.vy *= this.friction
+    this.vy += this.gravity
+    this.x += this.vx
+    this.y += this.vy
+    this.html.setAttribute('x', this.x)
+    this.html.setAttribute('y', this.y)
   }
-  accelerate(accel) {
-    this.velocity.addTo(accel)
+
+  accelerate(ax, ay) {
+    this.vx += ax
+    this.vy += ay
   }
-  angleTo(p2) {
-    // angle to body pulling on particle
-    return Math.atan2(
-      p2.position.getY() - this.position.getY(),
-      p2.position.getX() - this.position.getX()
-    )
+
+  angleTo(p2) { // angle to body pulling on particle
+    return Math.atan2(p2.y - this.y, p2.x - this.x)
   }
-  distanceTo(p2) {
-    // returns distance to other particle
-    const dx = p2.position.getX() - this.position.getX()
-    const dy = p2.position.getY() - this.position.getY()
+
+  distanceTo(p2) { // returns distance to other particle
+    const dx = p2.x - this.x
+    const dy = p2.y - this.y
     return Math.sqrt(dx * dx + dy * dy) // Pythagoras
   }
-  gravitateTo(p2) {
-    // returns gravity of p2 on this object
-    const grav = new Vector(0, 0)
-    const dist = this.distanceTo(p2)
-    grav.setLength(p2.mass / (dist * dist))
-    grav.setAngle(this.angleTo(p2))
-    this.velocity.addTo(grav)
-  }
-  /*
-  checkPosition() {
-    if ( this.getX() > (vw() - this.getW()) || this.getX() < 0 )
-      { this.direction.x = this.direction.x * -1 }
-    if ( this.getY() > (vh() - this.getH()) || this.getY() < 0 )
-      { this.direction.y = this.direction.y * -1 }
 
+  gravitateTo(p2) {
+    const dx = p2.x - this.x
+    const dy = p2.y - this.y
+    const distSQ = dx * dx + dy * dy
+    const dist = Math.sqrt(distSQ)
+    const force = p2.mass / distSQ
+    const ax = (dx / dist) * force
+    const ay = (dy / dist) * force
+    this.vx += ax
+    this.vy += ay
   }
-  */
 }
 
 class Circle {
   // ‘particle’ in coding math
-  // constructor(x, y, speed, direction, grav) {
   constructor(x, y, rad, speed, direction, gravity, friction) {
     const newCircle = document.createElementNS(svgNS, 'circle')
     newCircle.setAttribute('cx', x)
     newCircle.setAttribute('cy', y)
     newCircle.setAttribute('r', rad) // hard coded for now
-
-    this.html = newCircle
-    this.position = new Vector(x, y)
-    this.radius = 0 || rad
-    this.bounce = -1
-    // Velocity = Speed & Direction
-    this.velocity = new Vector(0, 0)
-    this.mass = 1
-    // Speed = this.velocity.getLength()
-    // Direction = this.velocity.getAngle()
-    this.direction = direction || 0
-    this.gravity = new Vector(0, gravity || 0)
-    this.speed = speed || 0
-    this.friction = friction || 1
-    // Acceleration = change of velocity over time (also a vector)
-    this.velocity.setLength(this.speed)
-    this.velocity.setAngle(this.direction)
-
     newCircle.setAttribute('transform-origin', `${x} ${y}`)
 
+    this.html = newCircle
+
+    this.x = x
+    this.y = y
+    this.radius = 0 || rad
+
+    this.vx = Math.cos(direction) * speed
+    this.vy = Math.sin(direction) * speed
+    this.gravity = gravity || 0
+
+    this.bounce = -1
+    this.mass = 1
+    this.direction = direction || 0
+    this.speed = speed || 0
+    this.friction = friction || 1
     svg.appendChild(newCircle)
   }
+
   getRadius() {
     return this.radius
   }
+
   getX() {
     return this.position.getX()
   }
+
   getY() {
     return this.position.getY()
   }
+
   setX(newX) {
-    this.position.setX(newX)
+    this.x = newX
     this.html.setAttribute('cx', newX)
   }
+
   setY(newY) {
-    this.position.setY(newY)
+    this.y = newY
     this.html.setAttribute('cy', newY)
   }
+
   setFill(c) {
     this.html.setAttribute('fill', c)
   }
+
   setStroke(s) {
     this.html.setAttribute('stroke', s)
   }
+
   move() {
-    this.position.addTo(this.velocity)
+    this.vx *= this.friction
+    this.vy *= this.friction
+    this.vy += this.gravity
+    this.x += this.vx
+    this.y += this.vy
+    this.html.setAttribute('cx', this.x)
+    this.html.setAttribute('cy', this.y)
+  }
 
-    // apply gravity if "in the air"
-    // unbefriedigend, to say the least
-    // if (this.position.getY() + this.radius - height <= 0.1) {
-      // should be set to floor eventually
-      this.velocity.addTo(this.gravity) // test this!
-    // } else {
-    //   this.position.setY(height - this.radius)
-    // }
+  accelerate(ax, ay) {
+    this.vx += ax
+    this.vy += ay
+  }
 
-    // apply friction only "on the floor"
-    // unbefriedigend, to say the least
-    // if (Math.trunc(this.position.getY()+this.radius - height) <= 1) {
-      // this.velocity.multiplyBy(this.friction)
-      const xVel = this.velocity.getX()
-      this.velocity.setX(xVel * this.friction)
-      // stop eventually
-      // if (this.velocity.getLength() < 0.1) {
-      //   this.velocity.setLength(0)
-      // }
-    // }
-    this.html.setAttribute('cx', this.position.getX())
-    this.html.setAttribute('cy', this.position.getY())
+  angleTo(p2) { // angle to body pulling on particle
+    return Math.atan2(p2.y - this.y, p2.x - this.x)
   }
-  accelerate(accel) {
-    this.velocity.addTo(accel)
-  }
-  angleTo(p2) {
-    // angle to body pulling on particle
-    return Math.atan2(
-      p2.position.getY() - this.position.getY(),
-      p2.position.getX() - this.position.getX()
-    )
-  }
-  distanceTo(p2) {
-    // returns distance to other particle
-    const dx = p2.position.getX() - this.position.getX()
-    const dy = p2.position.getY() - this.position.getY()
+
+  distanceTo(p2) { // returns distance to other particle
+    const dx = p2.x - this.x
+    const dy = p2.y - this.y
     return Math.sqrt(dx * dx + dy * dy) // Pythagoras
   }
-  gravitateTo(p2) {
-    // returns gravity of p2 on this object
-    const grav = new Vector(0, 0)
-    const dist = this.distanceTo(p2)
-    grav.setLength(p2.mass / (dist * dist))
-    grav.setAngle(this.angleTo(p2))
-    this.velocity.addTo(grav)
-  }
-  /*
-  checkPosition() {
-    if ( this.getX() > (vw() - this.getW()) || this.getX() < 0 )
-      { this.direction.x = this.direction.x * -1 }
-    if ( this.getY() > (vh() - this.getH()) || this.getY() < 0 )
-      { this.direction.y = this.direction.y * -1 }
 
+  gravitateTo(p2) {
+    const dx = p2.x - this.x
+    const dy = p2.y - this.y
+    const distSQ = dx * dx + dy * dy
+    const dist = Math.sqrt(distSQ)
+    const force = p2.mass / distSQ
+    const ax = (dx / dist) * force
+    const ay = (dy / dist) * force
+    this.vx += ax
+    this.vy += ay
   }
-  */
 }

@@ -23,8 +23,8 @@ const utils = {
   },
 
   distance: function(p1, p2) {
-    const dx = p1.getX() - p2.getX()
-    const dy = p1.getY() - p2.getY()
+    const dx = p1.x - p2.x
+    const dy = p1.y - p2.y
     return Math.sqrt(dx*dx + dy*dy)
   },
 
@@ -35,12 +35,12 @@ const utils = {
   },
 
   circleCollision: function(c0, c1) { // colliding circles
-    return this.distance(c0.position, c1.position) <= c0.radius + c1.radius
+    return this.distance(c0, c1) <= c0.radius + c1.radius
   },
 
   pointInCircle: function(x, y, circle) { // point collides with circle
-    const cx = circle.position.getX()
-    const cy = circle.position.getY()
+    const cx = circle.x
+    const cy = circle.y
     return this.distanceXY(x, y, cx, cy) < circle.getRadius() 
   },
 
@@ -69,14 +69,14 @@ const utils = {
   },
 
   rectIntersect: function(rect1, rect2) { // colliding rects
-    rect1left = rect1.position.getX()
-    rect1right = rect1.position.getX() + rect1.getWidth()
-    rect1top = rect1.position.getY()
-    rect1bottom = rect1.position.getY() + rect1.getHeight()
-    rect2left = rect2.position.getX()
-    rect2right = rect2.position.getX() + rect2.getWidth()
-    rect2top = rect2.position.getY()
-    rect2bottom = rect2.position.getY() + rect2.getHeight()
+    rect1left = rect1.x
+    rect1right = rect1.x + rect1.getWidth()
+    rect1top = rect1.y
+    rect1bottom = rect1.y + rect1.getHeight()
+    rect2left = rect2.x
+    rect2right = rect2.x + rect2.getWidth()
+    rect2top = rect2.y
+    rect2bottom = rect2.y + rect2.getHeight()
     const rangeX_Intersect = this.rangeIntersect(rect1left, rect1right, rect2left, rect2right)
     const rangeY_Intersect = this.rangeIntersect(rect1top, rect1bottom, rect2top, rect2bottom)
     return rangeX_Intersect && rangeY_Intersect
