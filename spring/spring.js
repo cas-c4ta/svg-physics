@@ -48,7 +48,7 @@ function loop() {
   weight.move()
 
   let points = [{x: springPoint.x, y: springPoint.y}, {x: weight.x, y: weight.y}]
-  path.updatePoints(points)
+  path.setPoints(points)
   // to do: drawPath from springPoint to weight
 
   requestAnimationFrame(loop)

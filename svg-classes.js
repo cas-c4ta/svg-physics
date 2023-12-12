@@ -1,6 +1,6 @@
 class Path {
   // ‘ship’ in coding math
-  constructor(points, angle, speed, direction, grav) {
+  constructor(points, angle, transformOrigin, speed, direction, gravity, friction) {
     this.d = ''
     for (const [index, point] of points.entries()) {
       if (index == 0) {
@@ -16,16 +16,30 @@ class Path {
     newPath.setAttribute('d', this.d)
     newPath.setAttribute('fill', 'red')
 
-    // SVG-Node
     this.html = newPath
 
+    this.points = points
+    this.translation = { x: 0, y: 0 }
+
+    this.vx = Math.cos(direction) * speed
+    this.vy = Math.sin(direction) * speed
+    this.gravity = gravity || 0
+
     this.angle = angle
+    this.transformOrigin = transformOrigin || {x: points[0].x, y: points[0].y}
+    this.updateOrigin(this.transformOrigin.x, this.transformOrigin.y)
     this.direction = direction || 0
     this.speed = speed || 0
-    // Acceleration = change of velocity over time (also a vector)
+    this.friction = friction || 1
+
     svg.appendChild(newPath)
   }
-  updatePoints(points) {
+
+  updateOrigin(x, y) {
+    this.html.setAttribute('transform-origin', `${x} ${y}`)
+  }
+
+  setPoints(points) {
     this.d = ''
     for (const [index, point] of points.entries()) {
       if (index == 0) {
@@ -38,44 +52,52 @@ class Path {
       }
     }
     this.html.setAttribute('d', this.d)
+    this.points = points
   }
-  getX() {
-    return parseInt(this.position.getX())
-  }
-  getY() {
-    return parseInt(this.position.getY())
-  }
+
   getAngle() {
     return parseFloat(this.angle)
   }
+
   setAngle(a) {
     this.angle = a % (Math.PI * 2)
-    console.log('set angle')
   }
+
   setFill(c) {
     this.html.setAttribute('fill', c)
   }
+
   setStroke(s) {
     this.html.setAttribute('stroke', s)
   }
+
   move() {
-    this.velocity.addTo(this.gravity)
-    this.position.addTo(this.velocity)
     // moving all points in a path is awful
     // transform seems good enough for the time being
-    const x = this.position.getX()
-    const y = this.position.getY()
-    const translateString = `translate(${Math.trunc(x)} ${Math.trunc(y)})`
-    // beware:
-    // turning point for angle is hard coded garbage!
-    const rotateString = `rotate(${
-      ((this.angle - Math.PI / 2) * 180) / Math.PI
-    }, 10, 10)` /* 🤡🐒 */
-    // also: stupid discrepancy between vector-angle and transform-angle
+    this.vx *= this.friction
+    this.vy *= this.friction
+    this.vy += this.gravity
+    console.log(`velocity: ${this.vx}, ${this.vy}`)
+
+    this.translation.x += this.vx
+    this.translation.y += this.vy
+
+    const x = Math.trunc(this.translation.x)
+    const y = Math.trunc(this.translation.y)
+    const translateString = `translate(${x} ${y})`
+
+    const a = ((this.angle - Math.PI / 2) * 180) / Math.PI 
+    const tx = this.transformOrigin.x
+    const ty = this.transformOrigin.y
+    const rotateString = `rotate(${a})`
+    // beware: stupid discrepancy between vector-angle and transform-angle
+    // ev. muss hinter rotate noch drehpunkt angegeben werden und zu transform-origin dazugezählt werden?
     this.html.setAttribute('transform', `${translateString} ${rotateString}`)
   }
-  accelerate(accel) {
-    this.velocity.addTo(accel)
+  
+  accelerate(ax, ay) {
+    this.vx += ax
+    this.vy += ay
   }
 }
 
