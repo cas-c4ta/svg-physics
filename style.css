@@ -23,13 +23,28 @@ body {
   align-items: center;
 }
 
-h1, h2, h3, p, li { color: white; }
+h1, h2, h3, p, li { 
+  color: white;
+  font-size: 1rem;
+}
 
 a {
   color: unset;
   text-decoration: none;
 }
 
+a:hover {
+  color: lime;
+}
+
+nav ul {
+  list-style: none;
+  padding: 0;
+}
+
 svg {
   overflow: visible;
+}
+footer p {
+  margin: 0;
 }

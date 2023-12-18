@@ -1,3 +1,7 @@
+// Coding Math, Episode 15/16
+// https://www.youtube.com/watch?v=JywnkK6Iuws
+// https://www.youtube.com/watch?v=jFG8MzvUTXg
+
 // spring
 const springPoint = { x: width/2, y: height/2 }
 
@@ -11,7 +15,7 @@ const radius = 10
 const speed = 50
 const dir = Math.random() * TAU
 const grav = 0.5
-const friction = 0.95
+const friction = 0.92
 const weight = new Circle(wp.x, wp.y, radius, speed, dir, grav, friction)
 const hue = Math.trunc(Math.random() * 360)
 weight.setFill(`hsl(${hue} 90% 60%)`)
@@ -24,7 +28,7 @@ const points = [
 const path = new Path(points)
 path.setStroke('white')
 
-const k = 0.1
+const k = 0.05 // stiffness of the spring
 const springLength = 100
 
 document.body.addEventListener('mousemove', (e) => {
